@@ -1,0 +1,49 @@
+name: CI/CD for my-app
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build React app
+      run: npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4
+      with:
+        branch: gh-pages
+        folder: build
+
+    - name: Configure GitHub Pages for React Router
+      run: |
+        echo "/* /index.html 200" > build/_redirects
+      working-directory: ./ 
+
+    - name: Cleanup
+      run: |
+        rm -rf node_modules
+        rm -rf build
